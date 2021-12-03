@@ -2,7 +2,7 @@
 
 namespace eShop.Domain.Orders
 {
-    internal class OrderStarted : Event
+    internal class OrderCancelled : Event
     {
         public Guid OrderId { get; set; }
     }

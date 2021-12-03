@@ -7,5 +7,7 @@ namespace eShop.Domain.Orders
         public Guid OrderId { get; set; }
 
         public OrderState State { get; set; }
+
+        public DateTime LastModified { get; set; }
     }
 }

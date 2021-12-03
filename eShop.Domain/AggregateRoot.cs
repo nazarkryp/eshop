@@ -6,7 +6,14 @@ namespace eShop.Domain
 {
     public class Event
     {
+        public Event()
+        {
+            Date = DateTime.UtcNow;
+        }
+
         public Guid? EventId { get; set; }
+
+        public DateTime Date { get; set; }
     }
 
     public abstract class AggregateRoot

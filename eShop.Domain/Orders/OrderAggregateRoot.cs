@@ -4,7 +4,7 @@ namespace eShop.Domain.Orders
 {
     public class OrderAggregateRoot : AggregateRoot
     {
-        private Order? _order;
+        private Order _order = null!;
 
         public OrderAggregateRoot()
         {
@@ -28,29 +28,34 @@ namespace eShop.Domain.Orders
 
         public Order GetOrder()
         {
-            if (_order == null)
-            {
-                throw new ArgumentNullException(nameof(_order), "Order not created");
-            }
-
             return _order;
         }
 
         public void Start()
         {
-            if (_order == null || _order.State != OrderState.New)
+            if (_order.State != OrderState.New)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Operation not valid for order in current state");
             }
 
             ApplyChanges(new OrderStarted());
         }
 
+        public void Cancel()
+        {
+            if (_order.State == OrderState.Completed)
+            {
+                throw new InvalidOperationException("Operation not valid for order in current state");
+            }
+
+            ApplyChanges(new OrderCancelled());
+        }
+
         public void Complete()
         {
-            if (_order == null || _order.State != OrderState.InProgress)
+            if (_order.State != OrderState.InProgress)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Operation not valid for order in current state");
             }
 
             ApplyChanges(new OrderCompleted());
@@ -63,7 +68,8 @@ namespace eShop.Domain.Orders
                 _order = new Order
                 {
                     OrderId = ((OrderCreated)@event).OrderId,
-                    State = OrderState.New
+                    State = OrderState.New,
+                    LastModified = @event.Date
                 };
 
                 Id = _order.OrderId;
@@ -71,10 +77,17 @@ namespace eShop.Domain.Orders
             else if (@event.GetType() == typeof(OrderStarted))
             {
                 _order.State = OrderState.InProgress;
+                _order.LastModified = ((OrderStarted)@event).Date;
+            }
+            else if (@event.GetType() == typeof(OrderCancelled))
+            {
+                _order.State = OrderState.Cancelled;
+                _order.LastModified = ((OrderCancelled)@event).Date;
             }
             else if (@event.GetType() == typeof(OrderCompleted))
             {
                 _order.State = OrderState.Completed;
+                _order.LastModified = ((OrderCompleted)@event).Date;
             }
         }
     }

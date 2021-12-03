@@ -42,7 +42,7 @@ namespace eShop.Web.Controllers
             return Ok(order);
         }
 
-        [HttpPost("{orderId}/start", Name = "StartOrder")]
+        [HttpPut("{orderId}/start", Name = "StartOrder")]
         public async Task<IActionResult> StartOrderAsync(Guid orderId)
         {
             await _sender.Send(new StartOrderCommand(orderId));
@@ -50,7 +50,15 @@ namespace eShop.Web.Controllers
             return Ok();
         }
 
-        [HttpPost("{orderId}/complete", Name = "Complete")]
+        [HttpDelete("{orderId}/cancel", Name = "CancelOrder")]
+        public async Task<IActionResult> CancelOrderAsync(Guid orderId)
+        {
+            await _sender.Send(new CancelOrderCommand(orderId));
+
+            return Ok();
+        }
+
+        [HttpPut("{orderId}/complete", Name = "Complete")]
         public async Task<IActionResult> CompleteOrderAsync(Guid orderId)
         {
             await _sender.Send(new CompleteOrderCommand(orderId));
